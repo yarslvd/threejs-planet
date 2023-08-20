@@ -1,14 +1,18 @@
 <script setup>
 import * as THREE from 'three';
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch, computed} from "vue";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import {useWindowResize} from "@/hooks/useWindowResize";
 
 const webGl = ref();
 let controls = null;
 let scene = null;
 let camera = null;
 let renderer = null;
-const aspect = window.innerWidth / window.innerHeight;
+const {width, height} = useWindowResize();
+const aspect = computed(() => {
+  return width.value / height.value;
+});
 
 const setCanvas = () => {
   //scene
@@ -20,7 +24,7 @@ const setCanvas = () => {
   const material = new THREE.MeshStandardMaterial( {
    map: new THREE.TextureLoader().load('/8k_mars.jpg')
   });
-  const sphere = new THREE.Mesh( geometry, material );
+  const sphere = new THREE.Mesh(geometry, material);
   scene.add(sphere);
 
   //light
@@ -29,7 +33,7 @@ const setCanvas = () => {
   scene.add(light);
 
   //camera
-  camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 100);
+  camera = new THREE.PerspectiveCamera(45, aspect.value, 0.1, 100);
   scene.add(camera);
   camera.add(light);
   camera.position.z = 19;
@@ -37,10 +41,11 @@ const setCanvas = () => {
   //renderer
   const canvas = webGl.value;
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.physicallyCorrectLights = true;
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.render(scene, camera);
 
-  controls = new OrbitControls( camera, renderer.domElement );
+  controls = new OrbitControls(camera, renderer.domElement);
   controls.maxDistance = 40;
   controls.minDistance = 8;
   controls.minPolarAngle = 0;
@@ -53,11 +58,28 @@ const setCanvas = () => {
   controls.update();
 }
 
-function animate() {
-  requestAnimationFrame(animate);
-  controls.update();
+function updateCamera() {
+  camera.aspect = aspect.value;
+  camera.updateProjectionMatrix();
+}
+
+function updateRender() {
+  renderer.setSize(width.value, height.value);
   renderer.render(scene, camera);
 }
+
+function animate() {
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+watch(aspect, (value) => {
+  if(value) {
+    updateCamera();
+    updateRender();
+  }
+})
 
 onMounted(() => {
   setCanvas();

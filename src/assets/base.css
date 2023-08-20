@@ -14,10 +14,12 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
   margin: 0;
 }
 
 .canvas {
   width: 100% !important;
   height: 100% !important;
+  overflow: hidden;
 }
