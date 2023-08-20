@@ -17,7 +17,6 @@ const aspect = computed(() => {
 const setCanvas = () => {
   //scene
   scene = new THREE.Scene();
-  scene.background = new THREE.TextureLoader().load("/8k_stars.jpg");
 
   //sphere
   const geometry = new THREE.SphereGeometry( 5, 60, 60 );
@@ -26,6 +25,15 @@ const setCanvas = () => {
   });
   const sphere = new THREE.Mesh(geometry, material);
   scene.add(sphere);
+
+  //bg sphere
+  const bgGeometry = new THREE.SphereGeometry(50, 60, 60);
+  const bgMaterial = new THREE.MeshLambertMaterial({
+    side: THREE.BackSide,
+    map: new THREE.TextureLoader().load("/8k_stars.jpg")
+  })
+  const bgSphere = new THREE.Mesh(bgGeometry, bgMaterial);
+  scene.add(bgSphere);
 
   //light
   const light = new THREE.PointLight(0xffffff, 5000);
